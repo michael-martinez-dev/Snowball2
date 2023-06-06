@@ -326,9 +326,16 @@ export default defineComponent({
       return (total - monthlyMin + this.computeMonthlyInterest(total - monthlyMin, interest));
     },
     computePaymentsLeft(total : number, interest : number, monthlyMin : number) : number {
-      if (interest == undefined || interest == 0)
-        return Math.ceil(total / monthlyMin);
-      return Math.ceil((total - monthlyMin + this.computeMonthlyInterest(total - monthlyMin, interest)) / monthlyMin);
+      let paymentsLeft = 0;
+      if (interest == undefined || interest == 0) {
+        paymentsLeft = Math.ceil(total / monthlyMin)
+      }
+      else {
+        paymentsLeft = Math.ceil((total - monthlyMin + this.computeMonthlyInterest(total - monthlyMin, interest)) / monthlyMin)}
+      if (paymentsLeft < 0 || isNaN(paymentsLeft)) {
+        paymentsLeft = 0
+      }
+      return paymentsLeft;
     },
   },
 });
