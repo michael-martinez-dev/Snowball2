@@ -27,3 +27,10 @@ pull request. I will review the pull request and merge it if it is good.
 ## License:
 This project is licensed under the MIT License - see the 
 [LICENSE.md](./LICENSE.md) file for details.
+
+## release notes:
+### v2.2.0
+- Added theme change
+- Added auto save option for notes
+- 🥳 when debt paid off
+- minor bug fixes
