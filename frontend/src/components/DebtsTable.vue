@@ -11,6 +11,10 @@
             flat
         >
           <v-toolbar-title><strong>Debt Snowball</strong></v-toolbar-title>
+          <v-btn variant="elevated" rounded @click="toggleTheme" >
+            {{ oppositeTheme }}
+          </v-btn>
+          <v-spacer></v-spacer>
           <v-dialog
               v-model="dialog"
               max-width="500px"
@@ -202,6 +206,7 @@
 <script lang="ts">
 import { defineComponent } from "vue";
 import { Bill } from "../models/Bills";
+import { useTheme } from 'vuetify';
 
 export default defineComponent({
   name: "DebtsTable",
@@ -249,23 +254,16 @@ export default defineComponent({
       ],
       dialog: false,
       dialogDelete: false,
-      // rules: {
-      //   name: (v: string) => !!v || "Name is required",
-      //   total: (v: string) => !!v || "Total is required",
-      //   monthly: (v: string) => !!v || "Monthly is required",
-      //   dueDay: (v: string) => !!v || "Due Day is required",
-      //   money: (v: string) => {
-      //     const pattern = /^\d+(\.\d{1,2})?$/;
-      //     return pattern.test(v) || "Invalid money amount";
-      //   },
-      // },
     };
   },
   computed: {
     formTitle() : string {
       return this.editedIndex == -1 ? "New Bill" : "Edit Bill";
     },
-
+    oppositeTheme() : string {
+      const theme = useTheme()
+      return theme.global.current.value.dark ? 'light theme' : 'dark theme'
+    },
   },
   watch: {
     dialog(val: boolean) {
@@ -337,6 +335,14 @@ export default defineComponent({
       }
       return paymentsLeft;
     },
+  },
+  setup () {
+    const theme = useTheme()
+
+    return {
+      theme,
+      toggleTheme: () => theme.global.name.value = theme.global.current.value.dark ? 'light' : 'dark',
+    }
   },
 });
 
