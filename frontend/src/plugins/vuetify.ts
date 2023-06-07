@@ -16,4 +16,7 @@ export default createVuetify({
             noDataText: 'Results not found',
         },
     },
+    theme: {
+        defaultTheme: 'dark'
+    }
 })
