@@ -1,11 +1,13 @@
 <template>
 <div class="debt-table">
-    <v-data-table :headers="headers" :items="bills" :sort-by="[{ key: 'total', order: 'asc' }]" class="elevation-10">
+    <v-data-table :headers="headers" :items="bills" :sort-by="[{ key: 'total', order: 'asc' }]" :search="search" class="elevation-10">
         <template v-slot:top>
             <v-toolbar flat>
                 <v-toolbar-title><strong>Debt Snowball</strong></v-toolbar-title>
+                <v-text-field v-model="search" label="Search" append-icon="mdi-magnify" single-line hide-details></v-text-field>
+                <v-spacer></v-spacer>
                 <v-btn variant="elevated" rounded @click="toggleTheme">
-                    {{ oppositeTheme }}
+                  {{ oppositeTheme }}
                 </v-btn>
                 <v-spacer></v-spacer>
                 <v-dialog v-model="dialog" max-width="500px">
@@ -142,6 +144,7 @@ export default defineComponent({
     },
     data() {
         return {
+            search: "",
             editedIndex: -1,
             form: {
                 name: "",
