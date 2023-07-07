@@ -1,9 +1,11 @@
 <template>
 <div class="debt-table">
-    <v-data-table :headers="headers" :items="bills" :sort-by="[{ key: 'total', order: 'asc' }]" :search="search" class="elevation-10">
+    <v-data-table ref="table1" :headers="headers" :items="bills" :sort-by="sortBy" :group-by="groupBy" :search="search" class="elevation-10">
         <template v-slot:top>
             <v-toolbar flat>
                 <v-toolbar-title><strong>Debt Snowball</strong></v-toolbar-title>
+                <v-spacer></v-spacer>
+                <v-checkbox v-model="group" label="Group by Type" color="primary" hide-details ></v-checkbox>
                 <v-text-field v-model="search" label="Search" append-icon="mdi-magnify" single-line hide-details></v-text-field>
                 <v-spacer></v-spacer>
                 <v-btn variant="elevated" rounded @click="toggleTheme">
@@ -87,7 +89,7 @@
             <span v-else>0</span>
         </template>
         <template v-slot:item.monthlyActual="{ item }">
-            <span v-if="item.raw.monthlyMin > 0">{{ parseFloat(item.raw.monthlyActual).toLocaleString('en-US', {style:"currency", currency:"USD"}) }}</span>
+            <span v-if="item.raw.monthlyActual > 0">{{ parseFloat(item.raw.monthlyActual).toLocaleString('en-US', {style:"currency", currency:"USD"}) }}</span>
             <span v-else>0</span>
         </template>
         <template v-slot:item.dueDay="{ item }">
@@ -145,6 +147,8 @@ export default defineComponent({
     data() {
         return {
             search: "",
+            group: true,
+            sortBy: [{ key: 'total', order: 'asc' }],
             editedIndex: -1,
             form: {
                 name: "",
@@ -163,49 +167,17 @@ export default defineComponent({
                 monthlyActual: 0,
                 dueDay: 0,
             } as Bill,
-            headers: [{
-                    title: "Name",
-                    align: "start",
-                    sortable: false,
-                    key: "name"
-                },
-                {
-                    title: "Type",
-                    key: "type"
-                },
-                {
-                    title: "Total Amount",
-                    key: "total"
-                },
-                {
-                    title: "Interest Rate",
-                    key: "interest"
-                },
-                {
-                    title: "Monthly Minimum",
-                    key: "monthlyMin"
-                },
-                {
-                    title: "Monthly Actual",
-                    key: "monthlyActual"
-                },
-                {
-                    title: "Post Payment",
-                    key: "postPayment"
-                },
-                {
-                    title: "Payments Left",
-                    key: "paymentsLeft"
-                },
-                {
-                    title: "Due Day",
-                    key: "dueDay"
-                },
-                {
-                    title: "",
-                    key: "actions",
-                    sortable: false
-                },
+            headers: [
+                { title: "Name", key: "name", align: "start", sortable: false },
+                { title: "Type", key: "type" },
+                { title: "Total Amount", key: "total" },
+                { title: "Interest Rate", key: "interest" },
+                { title: "Monthly Minimum",  key: "monthlyMin" },
+                { title: "Monthly Actual", key: "monthlyActual" },
+                { title: "Post Payment", key: "postPayment" },
+                { title: "Payments Left", key: "paymentsLeft" },
+                { title: "Due Day", key: "dueDay" },
+                { title: "", key: "actions", sortable: false },
             ],
             dialog: false,
             dialogDelete: false,
@@ -218,6 +190,12 @@ export default defineComponent({
         oppositeTheme(): string {
             const theme = useTheme()
             return theme.global.current.value.dark ? 'light theme' : 'dark theme'
+        },
+        groupBy(): any[] {
+            if (this.group) {
+                return [{ key: 'type', order: 'asc' }]
+            }
+            return []
         },
     },
     watch: {
