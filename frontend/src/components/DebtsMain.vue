@@ -28,7 +28,7 @@ export default defineComponent({
   data() {
     return {
       bills: [] as Bill[],
-      useActual: false,
+      useActual: true,
     }
   },
   computed: {
