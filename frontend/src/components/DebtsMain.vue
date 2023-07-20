@@ -1,16 +1,19 @@
 <template>
 <div class="debt-table">
-    <debts-table
-        v-model:bills="bills"
-        v-model:useActual="useActual"
+    <DebtsTable
+        :bills="bills"
+        :useActual="useActual"
         @addDebt="createDebt"
         @updateDebt="updateDebt"
         @deleteDebt="deleteDebt"
     />
-    <totals-display
-        v-model:total="total"
-        v-model:monthly="monthly"
-        v-model:useActual="useActual"
+    <DebtExport
+        :bills="bills"
+    />
+    <TotalsDisplay
+        :total="total"
+        :monthly="monthly"
+        :useActual="useActual"
         @useActual="useActual = !useActual"
     />
 </div>
@@ -19,6 +22,7 @@
 <script lang="ts">
 import DebtsTable from "./DebtsTable.vue";
 import TotalsDisplay from "./TotalsDisplay.vue";
+import DebtExport from "./DebtExport.vue";
 import {defineComponent} from "vue";
 import {Bill} from "../models/Bills";
 import { getBills, createBill, updateBill, deleteBill } from "../api/debts";
@@ -46,6 +50,7 @@ export default defineComponent({
   components: {
     DebtsTable,
     TotalsDisplay,
+    DebtExport,
   },
   created() {
     this.getDebts();

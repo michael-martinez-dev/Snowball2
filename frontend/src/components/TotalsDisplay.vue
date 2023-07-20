@@ -3,6 +3,8 @@
     <v-card
         class="totals-card"
         elevation="5"
+        width="100vw"
+        style="align-self: start;"
     >
       <v-card-title>
         <span class="text-h5">Debt Totals</span>

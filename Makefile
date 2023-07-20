@@ -1,5 +1,5 @@
 APP_NAME=debt-snowball
-APP_VERSION=v2.2.1
+APP_VERSION=v2.3.0
 
 
 .PHONEY: run dev prod clean
