@@ -35,8 +35,11 @@
                 md="4"
             >
               <strong>Payments Left: </strong>
-              {{ paymentsLeft }} ({{ YearsAndMonthsLeft.years }} years, {{ YearsAndMonthsLeft.months }} months)
+              {{ paymentsLeft }} ({{ YearsAndMonthsLeft.years }} years, {{ YearsAndMonthsLeft.months }} months)*
             </v-col>
+          </v-row>
+          <v-row>
+            * doesn't consider interest
           </v-row>
         </v-container>
       </v-card-text>
