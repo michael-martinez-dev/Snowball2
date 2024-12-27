@@ -1,10 +1,14 @@
 package main
 
 import (
+	"DebtSnowball2/backend"
 	"DebtSnowball2/backend/debt"
 	"DebtSnowball2/backend/notes"
 	"embed"
+	"io"
+	"os"
 
+	log "github.com/sirupsen/logrus"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -14,13 +18,18 @@ import (
 var assets embed.FS
 
 func main() {
-	// Create an instance of the app structure
+	println()
+
+	initLogger()
+	backend.InitProperties()
+
+	log.Infoln("Setting up Backend...")
 	snowball := debt.NewDebt("debt")
 	snowballNotes := notes.NewNote("debt-notes", "")
 
-	// Create application with options
+	log.Infoln("Setting up Frontend...")
 	err := wails.Run(&options.App{
-		Title:  "debt-snowball2",
+		Title:  "Debt Snowball 2",
 		Width:  1050,
 		Height: 550,
 		AssetServer: &assetserver.Options{
@@ -36,4 +45,16 @@ func main() {
 	if err != nil {
 		println("Error:", err.Error())
 	}
+}
+
+func initLogger() {
+	logFile, err := os.Create("Snowball2.log")
+	if err != nil {
+		log.Warnln("Could not create log file")
+		return
+	}
+
+	multiWriter := io.MultiWriter(os.Stdout, logFile)
+
+	log.SetOutput(multiWriter)
 }

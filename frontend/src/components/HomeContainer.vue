@@ -1,25 +1,90 @@
 <template>
-  <div class="home">
-    <DebtsMain />
-    <NotesSection />
-  </div>
+    <v-sheet elevation="3" rounded="lg">
+        <v-btn variant="elevated" @click="toggleTheme">
+            {{ oppositeTheme }}
+        </v-btn>
+        <v-tabs
+            v-model="tab"
+            :items="tabs"
+            align-tabs="center"
+            color="grey"
+            height="60"
+            slider-color="#f78166"
+        >
+            <template v-slot:tab="{ item }">
+                <v-tab
+                    :text="item.text"
+                    :value="item.value"
+                    class="text-none"
+                ></v-tab>
+            </template>
+
+            <template v-slot:item="{ item }">
+                <v-tabs-window-item :value="item.value" class="pa-4">
+                    <component :is="item.content" />
+                </v-tabs-window-item>
+            </template>
+        </v-tabs>
+    </v-sheet>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
 import NotesSection from "./NotesSection.vue";
 import DebtsMain from "./DebtsMain.vue";
+import HelpSection from "./HelpSection.vue";
+import TotalsDisplay from "./TotalsDisplay.vue";
+import { useTheme } from "vuetify";
 
 export default defineComponent({
-  name: "Home",
-  components: {DebtsMain, NotesSection},
-  props: {},
-  setup() {
-    return {};
-  },
+    name: "Home",
+    data() {
+        return {
+            tab: "debts",
+            tabs: [
+                {
+                    text: "Debts",
+                    value: "debts",
+                    content: DebtsMain,
+                },
+                {
+                    text: "Totals",
+                    value: "totals",
+                    content: TotalsDisplay,
+                },
+                {
+                    text: "Notes",
+                    value: "notes",
+                    content: NotesSection,
+                },
+                {
+                    text: "Help",
+                    value: "help",
+                    content: HelpSection,
+                },
+            ],
+        };
+    },
+    computed: {
+        oppositeTheme(): string {
+            const theme = useTheme();
+            return theme.global.current.value.dark
+                ? "light theme"
+                : "dark theme";
+        },
+    },
+    setup() {
+        const theme = useTheme();
+
+        return {
+            theme,
+            toggleTheme: () =>
+                (theme.global.name.value = theme.global.current.value.dark
+                    ? "light"
+                    : "dark"),
+        };
+    },
 });
 </script>
 
-<style>
-
-</style>
+<style scoped></style>

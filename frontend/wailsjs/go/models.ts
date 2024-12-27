@@ -1,6 +1,6 @@
-export namespace debt {
+export namespace models {
 	
-	export class GoBill {
+	export class NewBill {
 	    id: number;
 	    dueDay: number;
 	    name: string;
@@ -11,7 +11,7 @@ export namespace debt {
 	    interest: string;
 	
 	    static createFrom(source: any = {}) {
-	        return new GoBill(source);
+	        return new NewBill(source);
 	    }
 	
 	    constructor(source: any = {}) {

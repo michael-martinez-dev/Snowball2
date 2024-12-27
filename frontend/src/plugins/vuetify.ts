@@ -1,22 +1,19 @@
 // Styles
-import '@mdi/font/css/materialdesignicons.css'
-import 'vuetify/styles'
+import "@mdi/font/css/materialdesignicons.css";
+import "vuetify/styles";
 
 // Vuetify
-import { createVuetify } from 'vuetify'
-import {VDataTable} from "vuetify/labs/VDataTable";
+import { createVuetify } from "vuetify";
 
 export default createVuetify({
-    components: {
-        VDataTable,
+  components: {},
+  defaults: {
+    VDataTable: {
+      fixedHeader: true,
+      noDataText: "Results not found",
     },
-    defaults: {
-        VDataTable: {
-            fixedHeader: true,
-            noDataText: 'Results not found',
-        },
-    },
-    theme: {
-        defaultTheme: 'dark'
-    }
-})
+  },
+  theme: {
+    defaultTheme: "dark",
+  },
+});

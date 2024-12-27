@@ -1,57 +1,41 @@
-import { Module } from 'vuex';
-import { StateInterface } from '../index';
-import { Bill } from '../../models/Bills';
-import { getBills, createBill, updateBill, deleteBill } from '../../api/debts';
+import { defineStore } from "pinia";
+import { Bill } from "../../models/Bills";
+import { getBills, createBill, updateBill, deleteBill } from "../../api/debts";
 
-interface DebtsState {
-    debts: Bill[];
-}
+export const useDebtsStore = defineStore("debts", {
+  state: () => ({
+    debts: [] as Bill[],
+  }),
 
-const debtsModule: Module<DebtsState, StateInterface> = {
-    namespaced: true,
-    state: {
-        debts: []
+  getters: {
+    totalDebt(state): number {
+      return state.debts.reduce((total, debt) => total + debt.total, 0);
     },
-    mutations: {
-        SET_DEBTS(state, debts: Bill[]) {
-            state.debts = debts;
-            },
-        ADD_DEBT(state, debt: Bill) {
-            state.debts.push(debt);
-            },
-        UPDATE_DEBT(state, updatedDebt: Bill) {
-            const index = state.debts.findIndex(debt => debt.id === updatedDebt.id);
-            if (index !== -1) {
-                state.debts.splice(index, 1, updatedDebt);
-            }
-        },
-        DELETE_DEBT(state, debtId: number) {
-            state.debts = state.debts.filter(debt => debt.id !== debtId);
-        }
+    totalMonthlyMin(state): number {
+      return state.debts.reduce((sum, debt) => sum + debt.monthlyMin, 0);
     },
-    actions: {
-        async fetchDebts({ commit }) {
-            const debts = await getBills();
-            commit('SET_DEBTS', debts);
-            },
-        async addDebt({ commit }, debt: Bill) {
-            const newDebt = await createBill(debt);
-            commit('ADD_DEBT', newDebt);
-            },
-        async updateDebt({ commit }, debt: Bill) {
-            const updatedDebt = await updateBill(debt);
-            commit('UPDATE_DEBT', updatedDebt);
-            },
-        async removeDebt({ commit }, debtId: number) {
-            await deleteBill(debtId);
-            commit('DELETE_DEBT', debtId);
-        }
+    totalMonthlyActual(state): number {
+      return state.debts.reduce((sum, debt) => sum + debt.monthlyActual, 0);
     },
-    getters: {
-        totalDebt(state): number {
-            return state.debts.reduce((total, debt) => total + debt.total, 0);
-        }
-    }
-};
+  },
 
-export default debtsModule;
+  actions: {
+    async fetchDebts() {
+      const debts = await getBills();
+      console.log("fetchDebts...");
+      this.debts = debts;
+    },
+
+    addDebt(debt: Bill) {
+      createBill(debt).then(this.fetchDebts);
+    },
+
+    updateDebt(debt: Bill) {
+      updateBill(debt).then(this.fetchDebts);
+    },
+
+    removeDebt(debtId: number) {
+      deleteBill(debtId).then(this.fetchDebts);
+    },
+  },
+});

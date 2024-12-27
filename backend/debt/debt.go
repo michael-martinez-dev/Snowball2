@@ -1,24 +1,35 @@
 package debt
 
+import (
+	"DebtSnowball2/backend"
+	"DebtSnowball2/backend/debt/models"
+	"DebtSnowball2/backend/debt/store"
+)
+
 // Debt struct
 type Debt struct {
-	debtItems []GoBill
-	store     *store
+	debtItems []models.NewBill
+	dataStore *store.Store
 }
 
 // NewDebt creates a new Debt struct
 func NewDebt(storeFile string) *Debt {
-	storage := NewDebtStore(storeFile, "sqlite")
+	database := getDatabaseToUse()
+	storage := store.NewDebtStore(storeFile, database)
 	return &Debt{
-		debtItems: Load(storage),
-		store:     storage,
+		debtItems: store.Get(storage),
+		dataStore: storage,
 	}
+}
+
+func getDatabaseToUse() string {
+	return backend.DEFAULT_DB
 }
 
 // CreateDebtItem creates a new debt item
 func (d *Debt) CreateDebtItem(id, due int, total, monthlyMin, monthlyActual, interest, name, debtType string) {
 	d.debtItems = append(d.debtItems,
-		*NewDebtItem(
+		*models.NewDebtItem(
 			id,
 			due,
 			total,
@@ -29,12 +40,12 @@ func (d *Debt) CreateDebtItem(id, due int, total, monthlyMin, monthlyActual, int
 			debtType,
 		),
 	)
-	Save(d.store, d.debtItems)
+	store.Save(d.dataStore, d.debtItems)
 }
 
 // RetrieveDebts retrieves all debt items
-func (d *Debt) RetrieveDebts() []GoBill {
-	d.debtItems = Load(d.store)
+func (d *Debt) RetrieveDebts() []models.NewBill {
+	d.debtItems = store.Get(d.dataStore)
 	return d.debtItems
 }
 
@@ -42,7 +53,7 @@ func (d *Debt) RetrieveDebts() []GoBill {
 func (d *Debt) UpdateDebtItem(id, due int, total, monthlyMin, monthlyActual, interest, name, debtType string) {
 	for i, debtItem := range d.debtItems {
 		if debtItem.ID == id {
-			d.debtItems[i] = *NewDebtItem(
+			d.debtItems[i] = *models.NewDebtItem(
 				id,
 				due,
 				total,
@@ -54,7 +65,7 @@ func (d *Debt) UpdateDebtItem(id, due int, total, monthlyMin, monthlyActual, int
 			)
 		}
 	}
-	Save(d.store, d.debtItems)
+	store.Save(d.dataStore, d.debtItems)
 }
 
 // DeleteDebtItem deletes a debt item by id
@@ -64,7 +75,7 @@ func (d *Debt) DeleteDebtItem(id int) {
 			d.debtItems = append(d.debtItems[:i], d.debtItems[i+1:]...)
 		}
 	}
-	Delete(d.store, id)
+	store.Delete(d.dataStore, id)
 }
 
 // findDebtItem finds a debt item by name and returns true if found
