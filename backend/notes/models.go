@@ -1,8 +1,8 @@
 package notes
 
 type Note struct {
-	Title string
-	Body  string
+	Title string `json:"title"`
+	Body  string `json:"body"`
 }
 
 func NewNote(title, body string) *Note {

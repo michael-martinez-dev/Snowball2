@@ -32,7 +32,7 @@
 import { defineComponent } from "vue";
 import NotesSection from "./NotesSection.vue";
 import DebtsMain from "./DebtsMain.vue";
-import HelpSection from "./HelpSection.vue";
+// import HelpSection from "./HelpSection.vue";
 import TotalsDisplay from "./TotalsDisplay.vue";
 import { useTheme } from "vuetify";
 
@@ -57,11 +57,11 @@ export default defineComponent({
                     value: "notes",
                     content: NotesSection,
                 },
-                {
-                    text: "Help",
-                    value: "help",
-                    content: HelpSection,
-                },
+                // {
+                //     text: "Help",
+                //     value: "help",
+                //     content: HelpSection,
+                // },
             ],
         };
     },
