@@ -29,40 +29,42 @@
 </template>
 
 <script lang="ts">
-import { defineComponent } from "vue";
+import { defineComponent, markRaw } from "vue";
 import NotesSection from "./NotesSection.vue";
 import DebtsMain from "./DebtsMain.vue";
-// import HelpSection from "./HelpSection.vue";
+import HelpSection from "./HelpSection.vue";
 import TotalsDisplay from "./TotalsDisplay.vue";
 import { useTheme } from "vuetify";
+
+const tabItems = [
+    {
+        text: "Debts",
+        value: "debts",
+        content: markRaw(DebtsMain),
+    },
+    {
+        text: "Totals",
+        value: "totals",
+        content: markRaw(TotalsDisplay),
+    },
+    {
+        text: "Notes",
+        value: "notes",
+        content: markRaw(NotesSection),
+    },
+    {
+        text: "Help",
+        value: "help",
+        content: markRaw(HelpSection),
+    },
+];
 
 export default defineComponent({
     name: "Home",
     data() {
         return {
             tab: "debts",
-            tabs: [
-                {
-                    text: "Debts",
-                    value: "debts",
-                    content: DebtsMain,
-                },
-                {
-                    text: "Totals",
-                    value: "totals",
-                    content: TotalsDisplay,
-                },
-                {
-                    text: "Notes",
-                    value: "notes",
-                    content: NotesSection,
-                },
-                // {
-                //     text: "Help",
-                //     value: "help",
-                //     content: HelpSection,
-                // },
-            ],
+            tabs: tabItems,
         };
     },
     computed: {

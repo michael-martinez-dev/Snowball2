@@ -14,27 +14,27 @@ func NewSQLiteStore(db *gorm.DB) DebtStore {
 	}
 }
 
-func (s *sqliteDebtStore) Create(d *GoBill) error {
+func (s *sqliteDebtStore) Create(d *DebtRecord) error {
 	return s.db.Create(d).Error
 }
 
-func (s *sqliteDebtStore) Update(d *GoBill) error {
+func (s *sqliteDebtStore) Update(d *DebtRecord) error {
 	return s.db.Save(d).Error
 }
 
 func (s *sqliteDebtStore) Delete(id int) error {
-	res := s.db.Delete(&GoBill{}, id)
+	res := s.db.Delete(&DebtRecord{}, id)
 	return res.Error
 }
 
-func (s *sqliteDebtStore) GetAll() ([]GoBill, error) {
-	var debts []GoBill
+func (s *sqliteDebtStore) GetAll() ([]DebtRecord, error) {
+	var debts []DebtRecord
 	err := s.db.Find(&debts).Error
 	return debts, err
 }
 
-func (s *sqliteDebtStore) Get(id int) (*GoBill, error) {
-	var bill GoBill
+func (s *sqliteDebtStore) Get(id int) (*DebtRecord, error) {
+	var bill DebtRecord
 	err := s.db.First(&bill, id).Error
 	if err != nil {
 		return nil, err

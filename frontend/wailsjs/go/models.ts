@@ -3,6 +3,7 @@ export namespace config {
 	export class Config {
 	    DBType: string;
 	    DBPath: string;
+	    DBFile: string;
 	    NotesPath: string;
 	
 	    static createFrom(source: any = {}) {
@@ -13,6 +14,7 @@ export namespace config {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.DBType = source["DBType"];
 	        this.DBPath = source["DBPath"];
+	        this.DBFile = source["DBFile"];
 	        this.NotesPath = source["NotesPath"];
 	    }
 	}

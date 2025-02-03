@@ -18,9 +18,19 @@ func NewNotesService(directory string) *NotesService {
 }
 
 func (n *NotesService) ReadNotes(title string) string {
-	home, _ := os.UserHomeDir()
-	filePath := filepath.Join(home, title+".txt")
-	body, err := os.ReadFile(filePath)
+	if title == "" {
+		return ""
+	}
+	path := filepath.Join(n.directory, title+".txt")
+
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		if _, err := os.Create(path); err != nil {
+			log.Error(err)
+		}
+	}
+
+	body, err := os.ReadFile(path)
 	if err != nil {
 		log.Error(err)
 		body = []byte("")
@@ -29,8 +39,14 @@ func (n *NotesService) ReadNotes(title string) string {
 }
 
 func (n *NotesService) UpdateNotes(title, body string) error {
-	home, _ := os.UserHomeDir()
-	path := filepath.Join(home, title+".txt")
+	path := filepath.Join(n.directory, title+".txt")
+
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		if _, err := os.Create(path); err != nil {
+			log.Error(err)
+		}
+	}
 
 	if err := os.WriteFile(path, []byte(body), 0600); err != nil {
 		log.Error(err)

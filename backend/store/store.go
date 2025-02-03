@@ -10,8 +10,8 @@ import (
 	"gorm.io/gorm"
 )
 
-// GoBill is a representation of a debt
-type GoBill struct {
+// DebtRecord is a representation of a debt
+type DebtRecord struct {
 	ID            int    `json:"id" gorm:"primaryKey;autoIncrement"`
 	Name          string `json:"name"`
 	DebtType      string `json:"type"`
@@ -24,11 +24,11 @@ type GoBill struct {
 
 // DebtStore is an interface for storing and retrieving debt
 type DebtStore interface {
-	Create(debt *GoBill) error
-	Update(debt *GoBill) error
+	Create(debt *DebtRecord) error
+	Update(debt *DebtRecord) error
 	Delete(id int) error
-	Get(id int) (*GoBill, error)
-	GetAll() ([]GoBill, error)
+	Get(id int) (*DebtRecord, error)
+	GetAll() ([]DebtRecord, error)
 }
 
 func BuildDebtStore(dbType, dbPath string) (DebtStore, error) {
@@ -57,7 +57,7 @@ func buildSqliteStore(dbPath string) (DebtStore, error) {
 		return nil, fmt.Errorf("failed to open db: %w", err)
 	}
 
-	if err := db.AutoMigrate(&GoBill{}); err != nil {
+	if err := db.AutoMigrate(&DebtRecord{}); err != nil {
 		return nil, fmt.Errorf("failed to migrate db: %w", err)
 	}
 

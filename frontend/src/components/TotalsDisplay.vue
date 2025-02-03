@@ -1,98 +1,96 @@
 <template>
-    <v-container fluid>
-        <v-card
-            class="totals-card"
-            elevation="5"
-            width="100vw"
-            style="align-self: start"
-        >
-            <v-card-title>
-                <span class="text-h5">Debt Totals</span>
-            </v-card-title>
-            <v-card-text>
-                <v-container fluid>
-                    <v-switch
-                        v-model="useActual"
-                        label="Use Actual Monthly Payments"
-                    />
-                    <v-row>
-                        <v-col>
-                            <strong>Total Debt: </strong>
-                            - {{ totalFormatted }}
-                        </v-col>
-                        <v-col cols="12" sm="6" md="4">
-                            <strong>Monthly Payment: </strong>
-                            - {{ monthlyFormatted }}
-                        </v-col>
-                        <v-col cols="12" sm="6" md="4">
-                            <strong>Payments Left: </strong>
-                            {{ paymentsLeft }} ({{
-                                YearsAndMonthsLeft.years
-                            }}
-                            years, {{ YearsAndMonthsLeft.months }} months)*
-                        </v-col>
-                    </v-row>
-                    <v-row>* doesn't consider interest</v-row>
-                </v-container>
-            </v-card-text>
-        </v-card>
+    <v-container>
+        <v-switch v-model="useActual" label="Use Actual?" />
+        <div>
+            <strong>Total Principal: </strong>
+            {{
+                totalPrincipal.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                })
+            }}
+        </div>
+        <div>
+            <strong>Total Monthly Payment: </strong>
+            {{
+                totalMonthlyPayment.toLocaleString("en-US", {
+                    style: "currency",
+                    currency: "USD",
+                })
+            }}
+        </div>
+        <div>
+            <strong>Months Left: </strong>
+            {{ monthsLeft === Infinity ? "∞" : monthsLeft }}
+        </div>
     </v-container>
 </template>
 
 <script lang="ts">
-import { ref, computed, defineComponent } from "vue";
+import { defineComponent, computed, ref } from "vue";
 import { useDebtsStore } from "../store/modules/debts";
+
+// Import your new amortization utils
+import {
+    monthsToPayOff,
+    getMaximumMonthsToPayOffAllDebts,
+} from "../utils/amortization"; // <-- Path depends on your folder structure
+
+interface DebtItem {
+    id: number;
+    name: string;
+    type: string;
+    total: string; // principal
+    interest: string; // annual interest rate (%)
+    monthlyMin: string;
+    monthlyActual: string;
+    dueDay: number;
+}
 
 export default defineComponent({
     name: "TotalsDisplay",
     setup() {
         const debtsStore = useDebtsStore();
         const useActual = ref(true);
-        debtsStore.fetchDebts();
 
-        const monthly = computed(() => {
-            console.log("useActual: ", useActual.value);
-            debtsStore.fetchDebts();
-            let amt = useActual.value
-                ? debtsStore.totalMonthlyActual
-                : debtsStore.totalMonthlyMin;
-            console.log("amt = ", amt);
-            return amt;
+        // If you want the total principal
+        const totalPrincipal = computed(() => {
+            return debtsStore.debts.reduce((acc: number, d: DebtItem) => {
+                return acc + (parseFloat(d.total) || 0);
+            }, 0);
         });
 
-        const totalFormatted = computed(() => {
-            return debtsStore.totalDebt.toLocaleString("en-US", {
-                style: "currency",
-                currency: "USD",
+        // Summing monthly payments (choose min or actual)
+        const totalMonthlyPayment = computed(() => {
+            return debtsStore.debts.reduce((acc: number, d: DebtItem) => {
+                const pay = useActual.value
+                    ? parseFloat(d.monthlyActual) || 0
+                    : parseFloat(d.monthlyMin) || 0;
+                return acc + pay;
+            }, 0);
+        });
+
+        // For the "max months" approach
+        const monthsLeft = computed(() => {
+            // Convert each debt into the shape needed by getMaximumMonthsToPayOffAllDebts
+            const shaped = debtsStore.debts.map((d: DebtItem) => {
+                return {
+                    principal: parseFloat(d.total) || 0,
+                    annualInterestRate: parseFloat(d.interest) || 0,
+                    monthlyPayment: useActual.value
+                        ? parseFloat(d.monthlyActual) || 0
+                        : parseFloat(d.monthlyMin) || 0,
+                };
             });
-        });
 
-        const monthlyFormatted = computed(() => {
-            return monthly.value.toLocaleString("en-US", {
-                style: "currency",
-                currency: "USD",
-            });
-        });
-
-        const paymentsLeft = computed(() => {
-            const val = debtsStore.totalDebt / (monthly.value || 1);
-            const payments = Math.ceil(val);
-            return !Number.isNaN(payments) ? payments : 1;
-        });
-
-        const YearsAndMonthsLeft = computed(() => {
-            let payments = paymentsLeft.value;
-            let years = Math.floor(payments / 12);
-            let months = payments % 12;
-            return { years, months };
+            return getMaximumMonthsToPayOffAllDebts(shaped);
         });
 
         return {
             useActual,
-            totalFormatted,
-            monthlyFormatted,
-            paymentsLeft,
-            YearsAndMonthsLeft,
+            totalPrincipal,
+            totalMonthlyPayment,
+            monthsLeft,
         };
     },
 });

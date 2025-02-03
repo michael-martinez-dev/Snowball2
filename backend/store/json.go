@@ -19,7 +19,7 @@ func NewJSONStore(filePath string) DebtStore {
 	}
 }
 
-func (s *jsonDebtStore) Create(d *GoBill) error {
+func (s *jsonDebtStore) Create(d *DebtRecord) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -39,7 +39,7 @@ func (s *jsonDebtStore) Create(d *GoBill) error {
 	return s.writeAll(debts)
 }
 
-func (s *jsonDebtStore) Update(d *GoBill) error {
+func (s *jsonDebtStore) Update(d *DebtRecord) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -64,7 +64,7 @@ func (s *jsonDebtStore) Delete(id int) error {
 	if err != nil {
 		return err
 	}
-	newList := make([]GoBill, 0, len(debts))
+	newList := make([]DebtRecord, 0, len(debts))
 	found := false
 	for _, bill := range debts {
 		if bill.ID == id {
@@ -79,14 +79,14 @@ func (s *jsonDebtStore) Delete(id int) error {
 	return s.writeAll(newList)
 }
 
-func (s *jsonDebtStore) GetAll() ([]GoBill, error) {
+func (s *jsonDebtStore) GetAll() ([]DebtRecord, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	return s.readAll()
 }
 
-func (s *jsonDebtStore) Get(id int) (*GoBill, error) {
+func (s *jsonDebtStore) Get(id int) (*DebtRecord, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -103,26 +103,26 @@ func (s *jsonDebtStore) Get(id int) (*GoBill, error) {
 }
 
 // Helper: readAll from file
-func (s *jsonDebtStore) readAll() ([]GoBill, error) {
+func (s *jsonDebtStore) readAll() ([]DebtRecord, error) {
 	// Ensure the file exists
 	if _, err := os.Stat(s.filePath); os.IsNotExist(err) {
-		return []GoBill{}, nil
+		return []DebtRecord{}, nil
 	}
 
 	bytes, err := os.ReadFile(s.filePath)
 	if err != nil {
 		return nil, err
 	}
-	var debts []GoBill
+	var debts []DebtRecord
 	if len(bytes) == 0 {
-		return []GoBill{}, nil
+		return []DebtRecord{}, nil
 	}
 	err = json.Unmarshal(bytes, &debts)
 	return debts, err
 }
 
 // Helper: writeAll to file
-func (s *jsonDebtStore) writeAll(debts []GoBill) error {
+func (s *jsonDebtStore) writeAll(debts []DebtRecord) error {
 	data, err := json.MarshalIndent(debts, "", "  ")
 	if err != nil {
 		return err

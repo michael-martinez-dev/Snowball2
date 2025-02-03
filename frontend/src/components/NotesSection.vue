@@ -35,7 +35,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { UpdateNotesBody, ReadNotes } from "../../wailsjs/go/notes/Note";
+import { UpdateNotes, ReadNotes } from "../../wailsjs/go/notes/NotesService";
 
 export default defineComponent({
     name: "NotesSection",
@@ -52,6 +52,7 @@ export default defineComponent({
                 "Press the save button to save your notes.",
                 "Press the x at the top right of the My Notes section to delete all text.",
             ] as string[],
+            userNotesTitle: "DebtNotes",
             userNotes: "" as string,
             showNotes: false as boolean,
             autoSave: false as boolean,
@@ -62,20 +63,21 @@ export default defineComponent({
     },
     methods: {
         saveNotes() {
-            UpdateNotesBody(this.userNotes).then(() => {
+            console.log("Saving notes...");
+            UpdateNotes(this.userNotesTitle, this.userNotes).then(() => {
                 this.getNotes();
             });
         },
         getNotes() {
-            ReadNotes().then((notes: string) => {
+            console.log("Getting notes...");
+            ReadNotes(this.userNotesTitle).then((notes: string) => {
                 this.userNotes = notes;
             });
         },
         onUpdate() {
-            console.log("onUpdate");
             if (this.autoSave) {
+                console.log("Auto saving notes...");
                 this.saveNotes();
-                console.log("notes auto saved");
             }
         },
     },

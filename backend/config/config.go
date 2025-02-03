@@ -8,6 +8,7 @@ import (
 type Config struct {
 	DBType    string
 	DBPath    string
+	DBFile    string
 	NotesPath string
 }
 

@@ -1,16 +1,20 @@
 import { Bill } from "../models/Bills";
 import {
-  CreateDebtItem,
-  DeleteDebtItem,
-  RetrieveDebts,
-  UpdateDebtItem,
-} from "../../wailsjs/go/debt/Debt";
-import { models } from "../../wailsjs/go/models";
-import NewBill = models.NewBill;
+  CreateDebt,
+  DeleteDebt,
+  GetAllDebts,
+  GetDebtByID,
+  UpdateDebt,
+} from "../../wailsjs/go/debt/DebtService";
+import { debt } from "../../wailsjs/go/models";
+import NewBill = debt.Debt;
 
 export let getBills = async () => {
-  const NewBills = await RetrieveDebts();
+  const NewBills = await GetAllDebts();
   console.log(NewBills);
+  if (NewBills === null) {
+    return [];
+  }
   const bills: Bill[] = NewBills.map((NewBill: any) => {
     return {
       id: NewBill.id,
@@ -31,32 +35,14 @@ export let getBills = async () => {
 
 export let updateBill = async (bill: Bill) => {
   let TempBill = NewBill.createFrom(bill) as any;
-  await UpdateDebtItem(
-    TempBill.id,
-    TempBill.dueDay,
-    TempBill.total?.toString(),
-    TempBill.monthlyMin?.toString(),
-    TempBill.monthlyActual?.toString(),
-    TempBill.interest?.toString(),
-    TempBill.name,
-    TempBill.type,
-  );
+  await UpdateDebt(TempBill);
 };
 
 export let deleteBill = async (id: number) => {
-  await DeleteDebtItem(id);
+  await DeleteDebt(id);
 };
 
 export let createBill = async (bill: Bill) => {
   let TempBill = NewBill.createFrom(bill) as any;
-  await CreateDebtItem(
-    TempBill.id,
-    TempBill.dueDay,
-    TempBill.total?.toString(),
-    TempBill.monthlyMin?.toString(),
-    TempBill.monthlyActual?.toString(),
-    TempBill.interest?.toString(),
-    TempBill.name,
-    TempBill.type,
-  );
+  await CreateDebt(TempBill);
 };

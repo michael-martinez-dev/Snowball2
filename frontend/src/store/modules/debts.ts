@@ -21,8 +21,8 @@ export const useDebtsStore = defineStore("debts", {
 
   actions: {
     async fetchDebts() {
-      const debts = await getBills();
       console.log("fetchDebts...");
+      const debts = await getBills();
       this.debts = debts;
     },
 

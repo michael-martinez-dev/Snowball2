@@ -30,7 +30,7 @@ func (s *DebtService) MigrateTo(newStore store.DebtStore) error {
 	}
 
 	for _, d := range oldDebts {
-		gb := toGoBill(d)
+		gb := toDebtRecord(d)
 		if err := newStore.Create(&gb); err != nil {
 			return err
 		}
@@ -41,7 +41,7 @@ func (s *DebtService) MigrateTo(newStore store.DebtStore) error {
 
 func (s *DebtService) CreateDebt(d Debt) error {
 	log.Debugf("Creating new debt: %+v", d)
-	gb := toGoBill(d)
+	gb := toDebtRecord(d)
 	return s.repo.Create(&gb)
 }
 
@@ -62,7 +62,7 @@ func (s *DebtService) GetDebtByID(id int) (*Debt, error) {
 }
 
 func (s *DebtService) UpdateDebt(d Debt) error {
-	gb := toGoBill(d)
+	gb := toDebtRecord(d)
 	return s.repo.Update(&gb)
 }
 
@@ -70,8 +70,8 @@ func (s *DebtService) DeleteDebt(id int) error {
 	return s.repo.Delete(id)
 }
 
-func toGoBill(d Debt) store.GoBill {
-	return store.GoBill{
+func toDebtRecord(d Debt) store.DebtRecord {
+	return store.DebtRecord{
 		ID:            d.ID,
 		Name:          d.Name,
 		DebtType:      d.DebtType,
@@ -83,7 +83,7 @@ func toGoBill(d Debt) store.GoBill {
 	}
 }
 
-func toDomain(gb store.GoBill) *Debt {
+func toDomain(gb store.DebtRecord) *Debt {
 	return &Debt{
 		ID:            gb.ID,
 		Name:          gb.Name,
@@ -96,7 +96,7 @@ func toDomain(gb store.GoBill) *Debt {
 	}
 }
 
-func toDomainList(gbs []store.GoBill) []Debt {
+func toDomainList(gbs []store.DebtRecord) []Debt {
 	var debts []Debt
 	for _, gb := range gbs {
 		debts = append(debts, *toDomain(gb))

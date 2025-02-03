@@ -4,19 +4,19 @@ import "sync"
 
 type memoryStore struct {
 	mu     sync.Mutex
-	debts  []GoBill
+	debts  []DebtRecord
 	nextID int
 }
 
 // NewMemoryStore creates a new MemoryStore
 func NewMemoryStore() DebtStore {
 	return &memoryStore{
-		debts:  []GoBill{},
+		debts:  []DebtRecord{},
 		nextID: 1,
 	}
 }
 
-func (m *memoryStore) Create(d *GoBill) error {
+func (m *memoryStore) Create(d *DebtRecord) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -32,7 +32,7 @@ func (m *memoryStore) Create(d *GoBill) error {
 	return nil
 }
 
-func (m *memoryStore) Update(d *GoBill) error {
+func (m *memoryStore) Update(d *DebtRecord) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -58,17 +58,17 @@ func (m *memoryStore) Delete(id int) error {
 	return nil
 }
 
-func (m *memoryStore) GetAll() ([]GoBill, error) {
+func (m *memoryStore) GetAll() ([]DebtRecord, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
 	// Return a copy
-	copyItems := make([]GoBill, len(m.debts))
+	copyItems := make([]DebtRecord, len(m.debts))
 	copy(copyItems, m.debts)
 	return copyItems, nil
 }
 
-func (m *memoryStore) Get(id int) (*GoBill, error) {
+func (m *memoryStore) Get(id int) (*DebtRecord, error) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
