@@ -146,7 +146,7 @@
                                     size="small"
                                     @click="useMinAsActual"
                                 >
-                                    Use Min
+                                ->
                                 </v-btn>
                             </v-col>
 
