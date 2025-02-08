@@ -6,6 +6,7 @@ import {
   GetDebtByID,
   UpdateDebt,
 } from "../../wailsjs/go/debt/DebtService";
+import { SwitchDebtStore } from "../../wailsjs/go/app/AppManager";
 import { debt } from "../../wailsjs/go/models";
 import NewBill = debt.Debt;
 
@@ -45,4 +46,8 @@ export let deleteBill = async (id: number) => {
 export let createBill = async (bill: Bill) => {
   let TempBill = NewBill.createFrom(bill) as any;
   await CreateDebt(TempBill);
+};
+
+export let changeStorageLocation = async (newStoreDir: String) => {
+  await SwitchDebtStore(false, "sqlite", newStoreDir.toString());
 };

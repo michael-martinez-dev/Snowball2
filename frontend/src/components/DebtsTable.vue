@@ -1,14 +1,42 @@
 <template>
     <div class="debt-table">
-        <v-switch v-model="useActual" label="Use Actual?" />
-
+        <v-row>
+            <v-col cols="6">
+                <div class="py-3">
+                    <span class="text-h5"
+                        >Selected Total:
+                        {{
+                            selectedTotal.toLocaleString("en-US", {
+                                style: "currency",
+                                currency: "USD",
+                            })
+                        }}</span
+                    >
+                </div>
+                <div class="py-3">
+                    <span class="text-h5"
+                        >Selected Monthly:
+                        {{
+                            selectedMonthly.toLocaleString("en-US", {
+                                style: "currency",
+                                currency: "USD",
+                            })
+                        }}</span
+                    >
+                </div>
+                <v-switch v-model="useActual" label="Use Actual?" />
+            </v-col>
+        </v-row>
         <v-data-table
             ref="table1"
+            v-model="selected"
             :headers="headers"
             :items="debts"
             :sort-by="sortBy"
             :group-by="groupBy"
             :search="search"
+            show-select
+            return-object
             class="elevation-10"
         >
             <!-- Table Toolbar -->
@@ -46,6 +74,97 @@
                         @click="openDialogForNew"
                     />
                 </v-toolbar>
+            </template>
+
+            <!-- TOTAL -->
+            <template #item.total="{ item }">
+                <div
+                    v-if="editingRowId === item.id && editingField === 'total'"
+                >
+                    <v-text-field
+                        class="mt-5 pt-1 ml-n6"
+                        density="compact"
+                        variant="solo-filled"
+                        autofocus
+                        v-model="tempEdits.total"
+                        type="text"
+                        prefix="$"
+                        @blur="saveEdit(item, 'total')"
+                        @keydown.enter="saveEdit(item, 'total')"
+                    />
+                </div>
+                <div v-else @click="startEdit(item, 'total')">
+                    {{
+                        item.total.toLocaleString("en-US", {
+                            style: "currency",
+                            currency: "USD",
+                        })
+                    }}
+                </div>
+            </template>
+
+            <template #item.interest="{ item }">
+                {{ item.interest }}%
+            </template>
+
+            <!-- MONTHLY MIN -->
+            <template #item.monthlyMin="{ item }">
+                <div
+                    v-if="
+                        editingRowId === item.id &&
+                        editingField === 'monthlyMin'
+                    "
+                >
+                    <v-text-field
+                        class="mt-5 pt-1 ml-n6"
+                        density="compact"
+                        variant="solo-filled"
+                        autofocus
+                        v-model="tempEdits.monthlyMin"
+                        type="text"
+                        prefix="$"
+                        @blur="saveEdit(item, 'monthlyMin')"
+                        @keydown.enter="saveEdit(item, 'monthlyMin')"
+                    />
+                </div>
+                <div v-else @click="startEdit(item, 'monthlyMin')">
+                    {{
+                        item.monthlyMin.toLocaleString("en-US", {
+                            style: "currency",
+                            currency: "USD",
+                        })
+                    }}
+                </div>
+            </template>
+
+            <!-- MONTHLY ACTUAL -->
+            <template #item.monthlyActual="{ item }">
+                <div
+                    v-if="
+                        editingRowId === item.id &&
+                        editingField === 'monthlyActual'
+                    "
+                >
+                    <v-text-field
+                        class="mt-5 pt-1 ml-n6"
+                        density="compact"
+                        variant="solo-filled"
+                        autofocus
+                        v-model="tempEdits.monthlyActual"
+                        type="text"
+                        prefix="$"
+                        @blur="saveEdit(item, 'monthlyActual')"
+                        @keydown.enter="saveEdit(item, 'monthlyActual')"
+                    />
+                </div>
+                <div v-else @click="startEdit(item, 'monthlyActual')">
+                    {{
+                        item.monthlyActual.toLocaleString("en-US", {
+                            style: "currency",
+                            currency: "USD",
+                        })
+                    }}
+                </div>
             </template>
 
             <!-- Post Payment Column -->
@@ -146,7 +265,7 @@
                                     size="small"
                                     @click="useMinAsActual"
                                 >
-                                ->
+                                    ->
                                 </v-btn>
                             </v-col>
 
@@ -194,6 +313,7 @@
 <script lang="ts">
 import { defineComponent, ref, computed, reactive } from "vue";
 import { useDebtsStore } from "../store/modules/debts";
+import { changeStorageLocation } from "../api/debts";
 
 // A helper type for referencing each debt item
 interface DebtItem {
@@ -220,6 +340,7 @@ export default defineComponent({
         const dialog = ref(false);
         const formTitle = ref("");
         const useActual = ref(true);
+        const selected = ref([]);
 
         // Allowed types for the "Type" field
         const types = [
@@ -331,23 +452,58 @@ export default defineComponent({
                     interest: formData.interest.toString(),
                     monthlyMin: formData.monthlyMin.toString(),
                     monthlyActual: formData.monthlyActual.toString(),
-                    dueDay: formData.dueDay,
+                    dueDay: parseInt(formData.dueDay),
                 });
             } else {
                 // Update existing
                 debtsStore.updateDebt({
-                    id: formData.id,
+                    id: parseInt(formData.id),
                     name: formData.name,
                     type: formData.type,
                     total: formData.total.toString(),
                     interest: formData.interest.toString(),
                     monthlyMin: formData.monthlyMin.toString(),
                     monthlyActual: formData.monthlyActual.toString(),
-                    dueDay: formData.dueDay,
+                    dueDay: parseInt(formData.dueDay),
                 });
             }
             dialog.value = false;
         };
+
+        // For inline editing
+        const editingRowId = ref<number | null>(null);
+        const editingField = ref<string>("");
+        const tempEdits = reactive<DebtItem>({
+            total: "",
+            monthlyMin: "",
+            monthlyActual: "",
+        });
+
+        function startEdit(item: DebtItem, field: string) {
+            editingRowId.value = item.id;
+            editingField.value = field;
+
+            // Copy current values
+            tempEdits.total = item.total;
+            tempEdits.monthlyMin = item.monthlyMin;
+            tempEdits.monthlyActual = item.monthlyActual;
+        }
+
+        function saveEdit(item: DebtItem, field: string) {
+            editingRowId.value = null;
+            editingField.value = "";
+
+            item.interest = item.interest.toString();
+            item.total = tempEdits.total.toString();
+            item.monthlyMin = tempEdits.monthlyMin.toString();
+            item.monthlyActual = tempEdits.monthlyActual.toString();
+
+            console.log("saving inline edit...");
+            console.log(item);
+
+            // Update the store
+            debtsStore.updateDebt(item);
+        }
 
         // Delete a debt by ID
         const deleteDebt = (id: number) => {
@@ -373,6 +529,15 @@ export default defineComponent({
                 monthlyPayment = parseFloat(item.monthlyActual) || 0;
             } else {
                 monthlyPayment = parseFloat(item.monthlyMin) || 0;
+            }
+
+            // Edge cases
+            if (principal <= 0 || monthlyPayment <= 0) {
+                return (0.0).toFixed(2);
+            }
+
+            if (principal <= monthlyPayment) {
+                return (0.0).toFixed(2);
             }
 
             // 2. newPrincipal after 1 payment
@@ -418,6 +583,14 @@ export default defineComponent({
             if (A <= principal * i) {
                 return "∞";
             }
+            // if monthly payment is exactly principal, then 1 month payoff
+            if (A === principal) {
+                return "1";
+            }
+
+            if (A > principal) {
+                return "1";
+            }
 
             // No interest scenario
             if (i === 0) {
@@ -440,6 +613,27 @@ export default defineComponent({
             return n.toString();
         };
 
+        const selectedTotal = computed(() => {
+            console.log("selected", selected.value);
+            const result = selected.value.reduce((acc, item) => {
+                return acc + parseFloat(item.total);
+            }, 0);
+            console.log("selectedTotal", result);
+            return result;
+        });
+
+        const selectedMonthly = computed(() => {
+            console.log("selected", selected.value);
+            const result = selected.value.reduce((acc, item) => {
+                let monthly = useActual.value
+                    ? parseFloat(item.monthlyActual)
+                    : parseFloat(item.monthlyMin);
+                return acc + parseFloat(monthly);
+            }, 0);
+            console.log("selectedMonthly", result);
+            return result;
+        });
+
         return {
             // Data
             search,
@@ -450,6 +644,7 @@ export default defineComponent({
             formData,
             types,
             useActual,
+            selected,
 
             // Computed
             debts,
@@ -457,6 +652,9 @@ export default defineComponent({
 
             // Table
             headers,
+            editingRowId,
+            editingField,
+            tempEdits,
 
             // Methods
             openDialogForNew,
@@ -466,6 +664,10 @@ export default defineComponent({
             deleteDebt,
             resetForm,
             useMinAsActual,
+            selectedTotal,
+            selectedMonthly,
+            startEdit,
+            saveEdit,
 
             // Calculation methods (used in v-slot templates)
             calculatePostPayment,

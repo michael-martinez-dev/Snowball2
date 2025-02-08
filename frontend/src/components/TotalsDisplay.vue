@@ -20,8 +20,24 @@
             }}
         </div>
         <div>
-            <strong>Months Left: </strong>
-            {{ monthsLeft === Infinity ? "∞" : monthsLeft }}
+            <strong>Years and Months Left (W/ Interest): </strong>
+            {{
+                monthsAndYearsLeftWithInterest.years === Infinity
+                    ? "∞"
+                    : monthsAndYearsLeftWithInterest.years
+            }}
+            years,
+            {{
+                monthsAndYearsLeftWithInterest.months === Infinity
+                    ? "∞"
+                    : monthsAndYearsLeftWithInterest.months
+            }}
+            months
+        </div>
+        <div>
+            <strong>Years and Months Left (No Interest): </strong>
+            {{ monthsAndYearsLeftNoInterest.years }} years,
+            {{ monthsAndYearsLeftNoInterest.months }} months
         </div>
     </v-container>
 </template>
@@ -34,7 +50,7 @@ import { useDebtsStore } from "../store/modules/debts";
 import {
     monthsToPayOff,
     getMaximumMonthsToPayOffAllDebts,
-} from "../utils/amortization"; // <-- Path depends on your folder structure
+} from "../utils/amortization";
 
 interface DebtItem {
     id: number;
@@ -71,7 +87,7 @@ export default defineComponent({
         });
 
         // For the "max months" approach
-        const monthsLeft = computed(() => {
+        const monthsAndYearsLeftWithInterest = computed(() => {
             // Convert each debt into the shape needed by getMaximumMonthsToPayOffAllDebts
             const shaped = debtsStore.debts.map((d: DebtItem) => {
                 return {
@@ -83,14 +99,34 @@ export default defineComponent({
                 };
             });
 
-            return getMaximumMonthsToPayOffAllDebts(shaped);
+            // return { years: 0, months: 0 };
+
+            // // Get the maximum months to pay off all debts
+            const maxMonths = getMaximumMonthsToPayOffAllDebts(shaped);
+
+            if (maxMonths === Infinity) {
+                return { years: Infinity, months: Infinity };
+            }
+
+            return {
+                years: Math.floor(maxMonths / 12),
+                months: maxMonths % 12,
+            };
+        });
+
+        const monthsAndYearsLeftNoInterest = computed(() => {
+            const months = totalPrincipal.value / totalMonthlyPayment.value;
+            const years = Math.floor(months / 12);
+            const monthsLeft = Math.round(months % 12);
+            return { years, months: monthsLeft };
         });
 
         return {
             useActual,
             totalPrincipal,
             totalMonthlyPayment,
-            monthsLeft,
+            monthsAndYearsLeftWithInterest,
+            monthsAndYearsLeftNoInterest,
         };
     },
 });
