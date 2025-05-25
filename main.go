@@ -30,6 +30,12 @@ func main() {
 		NotesPath: filepath.Join("G:\\", "My Drive", "Personal", "Debts"),
 	}
 
+	// initialConfig := &config.Config{
+	// 	DBType:    "pocketbase",
+	// 	DBPath:    filepath.Join("http:\\", "10.0.0.35", ":8090", "api"),
+	// 	NotesPath: filepath.Join("G:\\", "My Drive", "Personal", "Debts"),
+	// }
+
 	cfgService := config.NewConfigService(initialConfig)
 
 	debtStore, err := store.BuildDebtStore(
@@ -54,7 +60,7 @@ func main() {
 			Assets: assets,
 		},
 		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
-		Bind: []interface{}{
+		Bind: []any{
 			debtService,
 			notesService,
 			cfgService,

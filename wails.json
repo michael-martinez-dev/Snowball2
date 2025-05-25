@@ -7,7 +7,7 @@
   "frontend:dev:watcher": "npm run dev",
   "frontend:dev:serverUrl": "auto",
   "author": {
-    "name": "Michael Marinez",
+    "name": "Michael Martinez",
     "email": "80479622+MixedMachine@users.noreply.github.com"
   }
 }

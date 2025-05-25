@@ -1,6 +1,12 @@
 package store
 
 import (
+	"fmt"
+	"os"
+	"path/filepath"
+
+	"github.com/labstack/gommon/log"
+	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
@@ -14,6 +20,27 @@ func NewSQLiteStore(db *gorm.DB) DebtStore {
 	}
 }
 
+func BuildSqliteStore(dbPath string) (DebtStore, error) {
+	home, _ := os.UserHomeDir()
+
+	if !filepath.IsAbs(dbPath) {
+		dbPath = filepath.Join(home, dbPath)
+	}
+
+	log.Infof("Openning sqlite db at %s", dbPath)
+	db, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to open db: %w", err)
+	}
+
+	if err := db.AutoMigrate(&DebtRecord{}); err != nil {
+		return nil, fmt.Errorf("failed to migrate db: %w", err)
+	}
+
+	log.Infof("Using SQLite store at %s", dbPath)
+
+	return NewSQLiteStore(db), nil
+}
 func (s *sqliteDebtStore) Create(d *DebtRecord) error {
 	return s.db.Create(d).Error
 }
